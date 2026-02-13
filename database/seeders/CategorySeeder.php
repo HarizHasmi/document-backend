@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Category;
 
@@ -13,9 +12,20 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $cats = ['Policy','Report','Template','Guide','Form','Other'];
-        foreach ($cats as $c) {
-            Category::create(['title'=>$c]);
+        $categories = [
+            'Policy' => 'Official policies and compliance documents.',
+            'Report' => 'Operational and performance reporting documents.',
+            'Template' => 'Reusable templates for recurring tasks.',
+            'Guide' => 'Instructional guides and process walkthroughs.',
+            'Form' => 'Forms used for requests and internal workflows.',
+            'Other' => 'Other supporting documents not in standard categories.',
+        ];
+
+        foreach ($categories as $title => $description) {
+            Category::updateOrCreate(
+                ['title' => $title],
+                ['description' => $description],
+            );
         }
     }
 }

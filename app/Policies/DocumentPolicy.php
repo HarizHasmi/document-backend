@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Document;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class DocumentPolicy
 {
@@ -13,34 +12,49 @@ class DocumentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin', 'manager', 'employee']);
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Document $doc)
+    public function view(User $user, Document $doc): bool
     {
-        if ($user->hasRole('admin')) return true;
-        if ($doc->access_level === 'public') return true;
-        if ($doc->access_level === 'department') {
-            return $user->department_id === $doc->department_id;
+        if ($user->hasRole('admin')) {
+            return true;
         }
-        return $doc->uploaded_by === $user->id;
+
+        if ($doc->access_level === 'public') {
+            return true;
+        }
+
+        if ($doc->uploaded_by === $user->id) {
+            return true;
+        }
+
+        if (
+            $user->hasRole('manager') &&
+            $doc->access_level === 'department' &&
+            $user->department_id === $doc->department_id
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user)
+    public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin','manager']);
+        return $user->hasAnyRole(['admin', 'manager']);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Document $doc)
+    public function update(User $user, Document $doc): bool
     {
         return $user->hasRole('admin')
             || ($user->hasRole('manager') && $doc->uploaded_by === $user->id);
@@ -49,9 +63,9 @@ class DocumentPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Document $doc)
+    public function delete(User $user, Document $doc): bool
     {
-        return $this->update($user,$doc);
+        return $this->update($user, $doc);
     }
 
     /**

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MasterDataController;
@@ -14,7 +13,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/logout',[AuthController::class,'logout']);
-        Route::get('/user',fn(Request $r)=>$r->user());
+        Route::get('/user',[AuthController::class,'me']);
 
         Route::get('/documents',[DocumentController::class,'index']);
         Route::get('/documents/{document}',[DocumentController::class,'show']);
